@@ -8,68 +8,46 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 import time
 
+# Navigate to results homepage
 url = "https://www.marathonguide.com/results/browse.cfm?RL=1&MIDD=15240415&Gen=B&Begin=1&End=100&Max=25530"
-
-#response = requests.get(url)
-# print(response.text)
 driver = webdriver.Chrome()
-
-# Open the webpage
 driver.get(url)
 
-# Find the select element by its name
+# Click the select menu and view the first 100 results
 select_element = driver.find_element(by=By.NAME, value="RaceRange")
-
-# Initialize a Select object with the select element
 select = Select(select_element)
-
-# Select the option with the specified value
 select.select_by_value("B,1,100,25530")
-
-
-# Parse the HTML
-#soup = BeautifulSoup(response.text, 'html.parser')
-#print(soup)
-# Extract table rows
-#rows = soup.find('table', )
-#mydivs = soup.find_all("table", {"class": "colordataTable"})
-
-
-#print(mydivs)#.find_all('tr')
 view_button = driver.find_element(by=By.NAME, value="SubmitButton")
 view_button.click()
 
-# Find the table element
-table = driver.find_element(By.CLASS_NAME, "colordataTable")
-
-# Find all rows within the table
-rows = table.find_elements(By.TAG_NAME, "tr")
-
-# Iterate over each row and print the data
-for row in rows:
-    # Find all cells within the row
-    cells = row.find_elements(By.TAG_NAME, "td")
-    # Extract text from each cell and print
-    for cell in cells:
-        print(cell.text)
-    print()  # Add an empty line between rows for clarity
-"""
-# Extract table data and create a list of dictionaries
 data = []
-for row in rows[1:]:  # Skip the header row
-    cells = row.find_all('td')
-    data.append({
-        "Name": cells[0].text.strip(),
-        "Time": cells[1].text.strip(),
-        "Overall Place": cells[2].text.strip(),
-        "Sex/Div Place": cells[3].text.strip(),
-        "Div": cells[4].text.strip(),
-        "Location": cells[5].text.strip(),
-        "AG Time": cells[6].text.strip(),
-        "BQ": cells[7].text.strip()
-    })
+for i in range(1):
+    time.sleep(1)
 
-# Create a DataFrame
-df = pd.DataFrame(data)
-print(df)
-"""
+    # Grab the table row elements
+    table = driver.find_element(By.CLASS_NAME, "colordataTable")
+    rows = table.find_elements(By.TAG_NAME, "tr")
+
+    # Iterate over each row and grab the data
+    for row in rows:
+        cells = row.find_elements(By.TAG_NAME, "td")
+        if cells:
+            name = cells[0].text
+            racetime = cells[1].text
+            overall_place = cells[2].text
+            sex_place = cells[3].text
+            division = cells[4].text
+            hometown = cells[5].text
+            age_adjusted_time = cells[6].text
+            boston_qualifier = cells[7].text
+            data_row = [name, racetime, division, hometown, boston_qualifier]
+            data.append(data_row)
+
+    # Click the right arrow to go to the next page
+    button = driver.find_element(By.XPATH, "//img[@src='../images/smallarrow_right.gif']")
+    button.click()
+
+
+results = pd.DataFrame(data)
+results.to_csv("data/boston_results_2024v2.csv", header=["Name", "Time", "Division", "Hometown", "Boston Qualify"], index=False)
+print(results.head(5))
