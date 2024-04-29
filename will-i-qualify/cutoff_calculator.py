@@ -20,13 +20,13 @@ def calculate_time_under_cutoff(df):
 
 
 def read_data():
-    df = pd.read_csv("data/boston_2024_cleaned.csv")
+    df = pd.read_csv("will-i-qualify/data/boston_2024_cleaned.csv")
     male_df = df.loc[df["Gender"] == "M", :]
     female_df = df.loc[df["Gender"] == "F", :]
     return male_df, female_df
 
 def read_cutoff_data():
-    cutoff_df = pd.read_csv("data/bq_cutoffs.csv")
+    cutoff_df = pd.read_csv("will-i-qualify/data/bq_cutoffs.csv")
     male_cutoffs = cutoff_df.loc[:, ["Age", "M"]]
     female_cutoffs = cutoff_df.loc[:, ["Age", "F"]]
     return male_cutoffs, female_cutoffs
