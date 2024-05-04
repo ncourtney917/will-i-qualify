@@ -11,6 +11,8 @@ requests = "^2.31.0"
 pandas = "^2.2.2"
 beautifulsoup4 = "^4.12.3"
 selenium = "^4.19.0"
+matplotlib = "^3.8.4"
+streamlit = "^1.33.0"
 
 
 [build-system]
