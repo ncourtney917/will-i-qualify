@@ -11,6 +11,10 @@ import time
 
 BOSTON_CUTOFF = "5:40:00"
 
+# TODO: Scrape multiple years at once
+# TODO: Handle when date is not in first parenthesis
+
+
 def get_marathon_results(driver, url, bq_year, marathon_name, marathon_date, finishers):
     start = time.time()
     # Navigate to results homepage
