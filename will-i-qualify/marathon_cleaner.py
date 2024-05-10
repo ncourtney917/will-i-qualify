@@ -78,7 +78,6 @@ class MarathonCleaner:
         return
 
     def calculate_birth_year(self):
-        s=1
         # TODO convert this to column-level, not static
         self.df["Marathon Date"] = pd.to_datetime(self.df["Marathon Date"])
         self.df["Race Day of Year"] = self.df["Marathon Date"].apply(lambda x: x.dayofyear)
@@ -117,7 +116,7 @@ class MarathonCleaner:
         self.calculate_birth_year()
         self.adjust_birthday()
         self.calculate_boston_age()
-        self.df = self.df[["Name", "Hometown", "Gender", "Random Birthday", "Age", "Age at Boston Marathon", "Boston Qualify", "Time"]]
+        self.df = self.df[["Name", "Hometown", "Gender", "Random Birthday", "Age", "Age at Boston Marathon", "Boston Qualify", "Marathon", "Time"]]
 
 def bq_marathon_splitter(df: pd.DataFrame, window_file: pd.DataFrame, bq_year: int, to_csv: bool = False):
     bq_year_window = window_file.loc[window_file["Boston Marathon Year"]==bq_year, :].reset_index(drop=True)
@@ -133,7 +132,7 @@ if __name__=="__main__":
     bq_year = 2025
     boston_date = "04/25/2025"
 
-    split_marathons = False
+    split_marathons = True
     if split_marathons:
         full_filename = "data/raw_results_all.csv"
         full_results_df = pd.read_csv(full_filename)

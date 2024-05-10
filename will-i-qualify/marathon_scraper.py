@@ -12,8 +12,7 @@ import time
 BOSTON_CUTOFF = "5:40:00"
 
 # TODO: Scrape multiple years at once
-# TODO: Handle when date is not in first parenthesis
-
+# TODO: Set scraped to True
 
 def get_marathon_results(driver, url, bq_year, marathon_name, marathon_date, finishers):
     start = time.time()
@@ -110,14 +109,22 @@ def get_marathon_results(driver, url, bq_year, marathon_name, marathon_date, fin
     print(f"Took {end - start} seconds to scrape")
     results = pd.DataFrame(data)
     # Write to file
-    if os.path.exists(f"data/bq{bq_year}_results.csv"):
-        results.to_csv(f"data/bq{bq_year}_results.csv", mode="a", header=False, index=False)
+    full_results_fname = "data/raw_results_all.csv"
+    if os.path.exists(full_results_fname):
+        results.to_csv(full_results_fname, mode="a", header=False, index=False)
     else:
-        results.to_csv(f"data/bq{bq_year}_results.csv", header=["Name", "Time", "Division", "Hometown", "Boston Qualify", "Marathon", "Marathon Date"], index=False)
+        results.to_csv(full_results_fname, header=["Name", "Time", "Division", "Hometown", "Boston Qualify", "Marathon", "Marathon Date"], index=False)
     return
 
 def get_marathon_list(driver, url, year):
     """Get list of all marathons in a given year on the boston qualifying page"""
+    marathon_list_fname = f"data/marathon_list.csv"
+    # Create file if it doesn't exist
+    try:
+        marathon_df = pd.read_csv(marathon_list_fname)
+    except:
+        marathon_df = pd.DataFrame()
+
     driver.get(url)
     bq_table = driver.find_elements(By.CLASS_NAME, "colordataTable")[1]
     rows = bq_table.find_elements(By.TAG_NAME, "tr")
@@ -135,12 +142,18 @@ def get_marathon_list(driver, url, year):
             finishers = cells[2].text
             mt_split = marathon_text.split("(")
             marathon_name = mt_split[0].strip()
-            marathon_date = mt_split[1].split(" ")[0]
+            marathon_date = mt_split[-1].split(" ")[0]
 
             marathon_row = [marathon_name, marathon_date, finishers, href]
             marathon_data.append(marathon_row)
-    results = pd.DataFrame(marathon_data)
-    results.to_csv(f"data/bq{year}_marathons.csv", header=["Name", "Date", "Finishers", "Link"], index=False)
+    results = pd.DataFrame(marathon_data, columns=["Name", "Date", "Finishers", "Link"])
+    results["Scraped"] = "FALSE"
+    if marathon_df.empty is False:
+        full_df = pd.concat([marathon_df, results], axis=0)
+    else:
+        full_df = results.copy()
+    full_df.drop_duplicates(subset=["Link"], keep="first", inplace=True)
+    full_df.to_csv(marathon_list_fname, header=True, index=False)
     return
 
 
@@ -148,17 +161,20 @@ def get_marathon_list(driver, url, year):
 if __name__ == "__main__":
     driver = webdriver.Chrome()
     bq_year = "2025"
-    year = 2023
+    year = 2024
     get_results = True
     if get_results:
         # Get marathon list
-        marathon_list = pd.read_csv(f"data/bq{year}_marathons.csv")
+        marathon_list = pd.read_csv(f"data/marathon_list.csv")
         for i, marathon in marathon_list.iterrows():
-            url = marathon["Link"]
-            marathon_name = marathon["Name"]
-            marathon_date = marathon["Date"]
-            num_finishers = marathon["Finishers"].replace(",", "")
-            get_marathon_results(driver, url, bq_year, marathon_name, marathon_date, num_finishers)
+            if marathon["Scraped"] == False:
+                url = marathon["Link"]
+                marathon_name = marathon["Name"]
+                marathon_date = marathon["Date"]
+                num_finishers = marathon["Finishers"].replace(",", "")
+                get_marathon_results(driver, url, bq_year, marathon_name, marathon_date, num_finishers)
+            else:
+                continue
     else:
         # Get marathon list from given year and write to CSV
         url = f"https://www.marathonguide.com/races/BostonMarathonQualifyingRaces.cfm?Year={str(year)}"
