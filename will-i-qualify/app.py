@@ -20,7 +20,7 @@ def convert_to_timedelta(timestring):
 
 def main():
     st.title("Will I Qualify?")
-    st.write("Calculate the current 2025 Boston Marathon qualifying time using current marathon times from the 50 top North American marathons")
+    st.write("Calculate the current 2025 Boston Marathon qualifying time using current marathon times from all North American Boston-Qualifying marathons")
 
     male_cutoffs, female_cutoffs, x_cutoffs = fetch_cutoff_data()
 

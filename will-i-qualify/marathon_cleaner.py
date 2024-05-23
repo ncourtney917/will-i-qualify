@@ -20,7 +20,13 @@ class MarathonCleaner:
     @staticmethod
     def generate_random_age_in_age_group(row):
         if isinstance(row["Division Start"], str) and isinstance(row["Division End"], str):
-            return int(np.random.randint(int(row['Division Start']), int(row['Division End'])))
+            if int(row["Division Start"]) > int(row["Division End"]):
+                start = int(row["Division End"])
+                end = int(row["Division Start"])
+            else:
+                end = int(row["Division End"])
+                start = int(row["Division Start"])
+            return int(np.random.randint(start, end))
         else:
             return ""
 
@@ -118,11 +124,11 @@ class MarathonCleaner:
         self.calculate_boston_age()
         self.df = self.df[["Name", "Hometown", "Gender", "Random Birthday", "Age", "Age at Boston Marathon", "Boston Qualify", "Marathon", "Time"]]
 
-def bq_marathon_splitter(df: pd.DataFrame, window_file: pd.DataFrame, bq_year: int, to_csv: bool = False):
-    bq_year_window = window_file.loc[window_file["Boston Marathon Year"]==bq_year, :].reset_index(drop=True)
+def bq_marathon_splitter(df: pd.DataFrame, window_file: pd.DataFrame, bq_year: str, to_csv: bool = False):
+    bq_year_window = window_file.loc[window_file["Boston Marathon Year"]==int(bq_year), :].reset_index(drop=True)
     bq_year_start = datetime.strptime(bq_year_window["Window Open"][0], "%m/%d/%Y")
     bq_year_end = datetime.strptime(bq_year_window["Window Closed"][0], "%m/%d/%Y")
-    df["Marathon Date"] = pd.to_datetime(df["Marathon Date"])
+    df["Marathon Date"] = pd.to_datetime(df["Marathon Date"], format="mixed", dayfirst=False)
     bq_year_results = df.loc[(df["Marathon Date"]<=bq_year_end) & (df["Marathon Date"] >= bq_year_start), :]
     if to_csv:
         bq_year_results.to_csv(f"data/bq{bq_year}_raw_results.csv", index=False)

@@ -11,7 +11,7 @@ def merge_gender_cutoffs(gender_race_df, gender_cutoff_df, gender_col):
     return gender_qualifying_df
 
 def calculate_time_under_cutoff(df):
-    df["Time Under Cutoff"] = pd.to_timedelta(df["Cutoff Time"]) - pd.to_timedelta(df["Time"])
+    df["Time Under Cutoff"] = pd.to_timedelta(df["Cutoff Time"]) - pd.to_timedelta(df["Time"], errors='coerce')
     df = df.loc[df["Time Under Cutoff"]>=pd.to_timedelta(0), :]
     df.sort_values(by="Time Under Cutoff", ascending=False, inplace=True)
     df['Time Under Cutoff'] = df['Time Under Cutoff'].astype(str).map(lambda x: x[-8:])
