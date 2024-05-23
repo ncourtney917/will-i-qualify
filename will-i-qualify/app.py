@@ -41,7 +41,7 @@ def main():
     st.write("----------")
     if button:
 
-        application_rates = [.77, .8, .83, 1]
+        application_rates = [.65, .70, .75, 1]
         application_rate_labels = [["Everyone Applies", "More than Usual Apply", "Average Number Apply", "Less than Usual Apply"]]
         # Create cutoff table and projected qualifying times based on application rates
         df = pd.DataFrame(columns=["Cut-Off Time", "Projected Qualifying Time"])
