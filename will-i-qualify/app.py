@@ -6,6 +6,7 @@ from cutoff_calculator import read_cutoff_data, run_cutoff_workflow
 
 FIELD_SIZE = 30000
 BQ_YEAR = "2025"
+NUM_FUTURE_QUALIFIERS = 4600
 
 @st.cache_data
 def fetch_cutoff_data():
@@ -46,7 +47,7 @@ def main():
         # Create cutoff table and projected qualifying times based on application rates
         df = pd.DataFrame(columns=["Cut-Off Time", "Projected Qualifying Time"])
         for rate in application_rates:
-            total_runners_qualified, cutoff_time = run_cutoff_workflow(rate, FIELD_SIZE, BQ_YEAR)
+            total_runners_qualified, cutoff_time = run_cutoff_workflow(rate, FIELD_SIZE, BQ_YEAR, NUM_FUTURE_QUALIFIERS)
 
             cutoff_time_delta = convert_to_timedelta(cutoff_time)
             adjusted_cutoff_time = standard_cutoff_delta - cutoff_time_delta
@@ -57,7 +58,8 @@ def main():
 
         # Display result
         st.html(f"""<h3>Results</h3>
-            <b>Total qualified runners:</b> {str(total_runners_qualified)}<br>
+            <b>Current qualified runners:</b> {str(total_runners_qualified - NUM_FUTURE_QUALIFIERS)}<br>
+            <b>Projected qualified runners:</b> {str(total_runners_qualified)}<br>
             <b>Official Qualifying Time for an Age {age} {gender}</b>: {standard_cutoff_time}<br><br>
             
             Projected cut-off and qualifying times based on the rate at which people who qualify for Boston actually apply for it

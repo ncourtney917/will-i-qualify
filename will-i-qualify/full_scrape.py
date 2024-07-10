@@ -42,5 +42,5 @@ def main():
     Boston25.clean_marathon()
     Boston25.df.to_csv(f"data/bq{str(bq_year)}_cleaned_results.csv", index=False)
 
-if "__name__" == "__main__":
+if __name__ == "__main__":
     main()
