@@ -111,7 +111,7 @@ def get_marathon_results(driver, url, bq_year, marathon_name, marathon_date, fin
         try:
             # Click the right arrow to go to the next page
             button = driver.find_element(By.XPATH, "//img[@src='../images/smallarrow_right.gif']")
-            button.click()
+            driver.execute_script("arguments[0].click();", button)
         except NoSuchElementException:
             break
 
