@@ -3,6 +3,7 @@ pd.options.mode.chained_assignment = None
 
 FIELD_SIZE = 30000
 APPLICATION_PERCENTAGE = .70
+RANDOM_SEED = 999
 
 
 def merge_gender_cutoffs(gender_race_df, gender_cutoff_df, gender_col):
@@ -40,12 +41,12 @@ def calculate_time_cutoff(male_df, male_cutoffs, female_df, female_cutoffs, x_df
     qualifying_df = calculate_time_under_cutoff(full_racer_df)
     qualifying_df.reset_index(drop=True, inplace=True)
     if future_qualifiers > 0:
-        future_df = qualifying_df.sample(n=future_qualifiers)
+        future_df = qualifying_df.sample(n=future_qualifiers, random_state=RANDOM_SEED)
         full_df = pd.concat([qualifying_df,future_df]).reset_index(drop=True)
     else:
         full_df = qualifying_df.copy()
 
-    applying_df = full_df.sample(frac=application_percentage)
+    applying_df = full_df.sample(frac=application_percentage, random_state=RANDOM_SEED)
     applying_df = applying_df.sort_values(by="Time Under Cutoff", ascending=False).reset_index(drop=True)
     applying_df = applying_df.iloc[:field_size, :]
     total_runners_qualified = len(full_df)
