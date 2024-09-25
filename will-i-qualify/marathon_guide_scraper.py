@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from datetime import datetime
 import os
 import time
@@ -41,8 +41,12 @@ def get_marathon_results(driver, url, bq_year, marathon_name, marathon_date, fin
     view_button.click()
     data = []
     for i in range(num_pages):
-        # Wait until table loads
-        WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "colordataTable")))
+        try:
+            # Wait until table loads
+            WebDriverWait(driver, 5).until(EC.presence_of_element_located((By.CLASS_NAME, "colordataTable")))
+        except TimeoutException:
+            print(f"Page did not load for {marathon_name}...skipping to the next marathon")
+
         # Grab the table row elements
         table = driver.find_element(By.CLASS_NAME, "colordataTable")
         rows = table.find_elements(By.TAG_NAME, "tr")
@@ -189,8 +193,8 @@ def scrape_results(driver, bq_year):
             get_marathon_results(driver, url, bq_year, marathon_name, marathon_date, num_finishers)
             marathon["Scraped"] = True
         marathons.append(marathon)
-    df = pd.DataFrame(marathons)
-    df.to_csv(marathon_list_fname, index=False)
+        df = pd.DataFrame(marathons)
+        df.to_csv(marathon_list_fname, index=False)
 
 
 if __name__ == "__main__":
